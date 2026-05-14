@@ -5,7 +5,7 @@ import {
   Baby, Scale, Ruler, HeartPulse, LineChart, 
   ClipboardList, Moon, Sun, RotateCcw, 
   ChevronDown, AlertCircle, CheckCircle, Info, Trash2, Calendar,
-  User, Bed, PersonStanding
+  User, Bed, PersonStanding, ArrowDownCircle
 } from 'lucide-react';
 
 Chart.register(...registerables);
@@ -17,8 +17,12 @@ const addFonts = () => {
     style.id = 'app-fonts';
     style.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+      
+      html { scroll-behavior: smooth; } /* Efek gulir halus (Smooth Scroll) */
+      
       .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
       .font-body { font-family: 'Inter', sans-serif; }
+      
       @media print {
         body { background: white !important; }
         .no-print { display: none !important; }
@@ -36,6 +40,15 @@ const addFonts = () => {
         animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0; /* Mulai dalam keadaan tak terlihat */
       }
+      
+      /* Animasi gelembung background (Glow effect) */
+      @keyframes floatBlob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+      }
+      .animate-blob { animation: floatBlob 10s infinite alternate ease-in-out; }
     `;
     document.head.appendChild(style);
   }
@@ -941,6 +954,12 @@ const imtu_perempuan_24_60 = {
 };
 
 // ─── 3. CONSTANTS & CONFIG ──────────────────────────────
+const CONFIG = {
+  // Masukkan URL logo Anda di bawah ini (contoh: 'https://domain.com/logo.png').
+  // Jika dibiarkan kosong (''), sistem akan otomatis menggunakan Ikon Baby bawaan.
+  LOGO_URL: 'https://img.sanishtech.com/u/4533435f511c6dbe1b9ef85f5427a6e8.png', 
+};
+
 const THEME = {
   primary: 'bg-teal-600',
   primaryText: 'text-teal-600',
@@ -1544,7 +1563,9 @@ export default function App() {
       setTimeout(() => {
         const resultElement = document.getElementById('result-section');
         if (resultElement) {
-          window.scrollTo({ top: resultElement.offsetTop - 20, behavior: 'smooth' });
+          // Menggunakan getBoundingClientRect agar scroll absolut dan tidak meleset ke hero section
+          const y = resultElement.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }, 100);
 
@@ -1642,25 +1663,83 @@ export default function App() {
 
   return (
     <div className={`min-h-screen font-body transition-colors duration-300 ${THEME.bgMain} ${THEME.textMain}`}>
-      {/* HEADER */}
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border-b border-slate-200/50 dark:border-slate-700/50 shadow-sm' : 'bg-transparent border-b border-transparent'}`}>
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
-            <Baby className="w-8 h-8" />
-            <h1 className="font-heading font-bold text-xl tracking-tight hidden sm:block">NutriCare<span className="text-slate-800 dark:text-white">Calc</span></h1>
+      {/* HEADER NAVBAR */}
+      <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled ? 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 shadow-sm py-2' : 'bg-transparent border-b border-transparent py-4'}`}>
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 flex items-center justify-between">
+          <div 
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            {CONFIG.LOGO_URL ? (
+              <img src={CONFIG.LOGO_URL} alt="Logo" className={`object-contain transition-all duration-300 ${isScrolled ? 'h-10' : 'h-14'}`} />
+            ) : (
+              <Baby className={`text-teal-600 dark:text-teal-400 transition-all duration-300 ${isScrolled ? 'w-8 h-8' : 'w-10 h-10'}`} />
+            )}
+            
+            {/* Saran: Teks disembunyikan jika menggunakan logo eksternal (seperti Kemenkes) agar lebih bersih */}
+            {!CONFIG.LOGO_URL && (
+              <h1 className={`font-heading font-bold tracking-tight hidden sm:block transition-all duration-300 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>
+                <span className="text-teal-600 dark:text-teal-400">NutriCare</span>
+                <span className="text-slate-800 dark:text-white">Calc</span>
+              </h1>
+            )}
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Tema">
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="p-2.5 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors" title="Toggle Tema">
+              {isDark ? <Sun className="w-5 h-5 text-slate-200" /> : <Moon className="w-5 h-5 text-slate-600" />}
             </button>
-            <button onClick={triggerReset} className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 transition-colors" title="Reset Data">
+            <button onClick={triggerReset} className="p-2.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 transition-colors hidden sm:block" title="Reset Data">
               <RotateCcw className="w-5 h-5" />
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 print-container">
+      {/* HERO SECTION / HALAMAN AWAL */}
+      <section className="relative w-full min-h-[95vh] flex items-center justify-center overflow-hidden px-4 pt-20 no-print">
+        {/* Latar Belakang Gelembung Cahaya (Glassmorphism Glow) */}
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 md:w-96 md:h-96 bg-teal-400/20 dark:bg-teal-500/10 rounded-full blur-[80px] md:blur-[120px] animate-blob pointer-events-none"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 md:w-96 md:h-96 bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[80px] md:blur-[120px] animate-blob pointer-events-none" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center animate-slide-up">
+          <div className="px-4 py-2 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 shadow-sm mb-6 inline-flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+            <span className="text-xs md:text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-wide uppercase">Standar Kemenkes RI & WHO</span>
+          </div>
+          
+          <h1 className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-slate-800 dark:text-white leading-[1.1] mb-6 tracking-tight">
+            Pantau Tumbuh Kembang Anak <br className="hidden md:block" /> 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-cyan-500">
+              Akurat, Cepat & Cerdas
+            </span>
+          </h1>
+          
+          <p className="text-slate-600 dark:text-slate-400 text-base md:text-xl mb-10 max-w-2xl leading-relaxed">
+            Aplikasi analisis status gizi untuk balita (0-60 bulan) yang dirancang untuk orang tua dan tenaga kesehatan. Dapatkan grafik pertumbuhan dan interpretasi Z-Score seketika.
+          </p>
+          
+          <button 
+            onClick={() => {
+              const element = document.getElementById('kalkulator-section');
+              const headerOffset = 80; // Sesuaikan dengan tinggi navbar
+              const elementPosition = element.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.scrollY - headerOffset;
+              window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }}
+            className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-bold text-lg shadow-[0_0_40px_-10px_rgba(13,148,136,0.6)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_50px_-10px_rgba(13,148,136,0.8)] active:scale-95 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Mulai Kalkulasi
+              <ArrowDownCircle className="w-5 h-5 group-hover:animate-bounce" />
+            </span>
+            {/* Efek kilap menyapu saat di-hover */}
+            <div className="absolute inset-0 h-full w-full -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+          </button>
+        </div>
+      </section>
+
+      {/* KALKULATOR SECTION (Tujuan Scroll) */}
+      <main id="kalkulator-section" className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 print-container relative z-10">
         
         {/* LEFT COLUMN: FORM */}
         <div className="lg:col-span-4 space-y-6 no-print">
@@ -1815,7 +1894,7 @@ export default function App() {
           )}
 
           {result && !isLoading && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-slide-up">
               
               {/* Header Print */}
               <div className="hidden print-only text-center border-b pb-6 mb-6">
