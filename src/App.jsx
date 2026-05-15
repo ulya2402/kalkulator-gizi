@@ -957,7 +957,7 @@ const imtu_perempuan_24_60 = {
 const CONFIG = {
   // Masukkan URL logo Anda di bawah ini (contoh: 'https://domain.com/logo.png').
   // Jika dibiarkan kosong (''), sistem akan otomatis menggunakan Ikon Baby bawaan.
-  LOGO_URL: 'https://img.sanishtech.com/u/4533435f511c6dbe1b9ef85f5427a6e8.png', 
+  LOGO_URL: 'https://i.ibb.co.com/4ZwRzfHp/logopoltekkessby-1.png', 
 };
 
 const THEME = {
